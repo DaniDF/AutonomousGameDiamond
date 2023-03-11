@@ -1,43 +1,30 @@
 from move import Move
 import random
+from game import Game
+
+rand = random.Random(24)
 
 
 class Player:
     state_action = {}
+    game = None
 
-    def __init__(self, game):
+    def play_game(self, game, on_move_played=lambda game, move: None):
         self.game = game
 
-        self.state_action[self.game.state.__str__()] = {
-            Move.UP: 0,
-            Move.RIGHT: 0,
-            Move.DOWN: 0,
-            Move.LEFT: 0
-        }
-
-    def play_one_move(self):
-        greedy_moves = self.__get_greedy_moves__()
-
-        action = greedy_moves[random.randrange(0, len(greedy_moves), 1)]
-        eat_diamond = self.game.move_robot(move=action)
-
-        return action, eat_diamond
-
-    def learn(self, episodes=1000):
-        for count in range(episodes):
-            print("Start episode", count)
-            self.__learn_episode__()
-            print("End episode", count)
-
-    def __learn_episode__(self):
-        moves = []
         flag_stop = False
 
         while not flag_stop:
-            old_state = self.game.state.__str__()
-            action, flag_stop = self.play_one_move()
+            move, flag_stop = self.play_one_move(alpha=0)
+            on_move_played(self.game, move)
 
-            if self.game.state.__str__() not in self.state_action.keys():
+    def learn(self, episodes=1000, board_dim=3):
+        for count in range(episodes):
+            self.game = Game(board_dim=board_dim)
+
+            try:
+                self.state_action[self.game.state.__str__()]
+            except KeyError:
                 self.state_action[self.game.state.__str__()] = {
                     Move.UP: 0,
                     Move.RIGHT: 0,
@@ -45,28 +32,45 @@ class Player:
                     Move.LEFT: 0
                 }
 
-            moves.append((old_state, action))
+            flag_stop = False
 
-        self.__reward_moves__(moves)
+            while not flag_stop:
+                _, flag_stop = self.play_one_move()
 
-    def __reward_moves__(self, actions):
-        num_moves = len(actions)
+    def play_one_move(self, alpha=0.5):
+        greedy_move = self.__get_greedy_moves__()
 
-        for (state, move) in actions:
-            self.state_action[state][move] -= num_moves
+        old_state = self.game.state.__str__()
+        eat_diamond = self.game.move_robot(move=greedy_move)
 
-    def __get_greedy_moves__(self):
-        actions = self.state_action[self.game.state.__str__()]
+        try:
+            self.state_action[self.game.state.__str__()]
 
-        result = []
-        result_value = 0
+        except KeyError:
+            self.state_action[self.game.state.__str__()] = {
+                Move.UP: 0,
+                Move.RIGHT: 0,
+                Move.DOWN: 0,
+                Move.LEFT: 0
+            }
 
-        for action in actions:
-            if actions[action] > result_value:
-                result = [action]
-                result_value = actions[action]
+        if not eat_diamond:
+            q_n = self.state_action[old_state][greedy_move]
+            max_q_n_1 = max([qn[1] for qn in self.state_action[self.game.state.__str__()].items()])
+            self.state_action[old_state][greedy_move] = q_n + alpha * (-1 + max_q_n_1 - q_n)
 
-            elif actions[action] == result_value:
-                result.append(action)
+        return greedy_move, eat_diamond
 
-        return result
+    def __get_greedy_moves__(self, epsilon=0.9):
+        actions = None
+        try:
+            actions = self.state_action[self.game.state.__str__()]
+        except KeyError:
+            print()
+
+        sorted_actions = sorted(actions.items(), key=lambda x: -x[1])
+
+        if rand.choices([0, 1], weights=[1-epsilon, epsilon]) == 1:
+            sorted_actions.insert(0, rand.choice(sorted_actions)[0])
+
+        return sorted_actions[0][0]

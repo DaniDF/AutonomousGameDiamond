@@ -6,15 +6,16 @@ from game_state import GameState
 class Game:
     robot_pos = ()
 
-    def __init__(self):
-        self.state = GameState(3)
+    def __init__(self, board_dim=3):
+        self.board_dim = board_dim
+        self.state = GameState(self.board_dim)
 
-        self.robot_pos = (random.randrange(0, 3, 1), random.randrange(0, 3, 1))
+        self.robot_pos = (random.randrange(0, self.board_dim, 1), random.randrange(0, self.board_dim, 1))
         self.state.state[self.robot_pos[0]][self.robot_pos[1]] = GameState.ROBOT
 
-        diamond_pos = (random.randrange(0, 3, 1), random.randrange(0, 3, 1))
+        diamond_pos = (random.randrange(0, self.board_dim, 1), random.randrange(0, self.board_dim, 1))
         while diamond_pos[0] == self.robot_pos[0] and diamond_pos[1] == self.robot_pos[1]:
-            diamond_pos = (random.randrange(0, 3, 1), random.randrange(0, 3, 1))
+            diamond_pos = (random.randrange(0, self.board_dim, 1), random.randrange(0, self.board_dim, 1))
 
         self.state.state[diamond_pos[0]][diamond_pos[1]] = GameState.DIAMOND
 

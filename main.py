@@ -2,6 +2,8 @@ from game import Game
 from player import Player
 from move import Move
 
+import time
+
 
 def user_play(game):
     print(game)
@@ -26,31 +28,26 @@ def user_play(game):
 
 
 def player_play(game):
-    print(game)
-
-    player = Player(Game())
+    player = Player()
 
     print("Start learning")
-    player.learn(episodes=10)
-    print("Learning finished")
+    player.learn(board_dim=game.board_dim)
+    print("Stop learning")
 
-    player.game = game
+    print(game)
+    print()
+    player.play_game(game=game, on_move_played=on_move_played)
 
-    try:
-        flag_stop = False
 
-        while not flag_stop:
-            input()
-            print(player.play_one_move())
-
-            print(game)
-
-    except EOFError:
-        print(game)
+def on_move_played(game, move):
+    print(move)
+    print(game)
+    print()
+    time.sleep(2)
 
 
 def main():
-    game = Game()
+    game = Game(board_dim=4)
 
     player_play(game)
     # user_play(game)
