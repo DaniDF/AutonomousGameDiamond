@@ -32,7 +32,7 @@ def player_play(game):
     player = Player()
 
     print("Start learning")
-    player.learn(board_dim=game.board_dim)
+    player.learn(episodes=game.board_dim*2000, board_dim=game.board_dim)
     print("Stop learning")
 
     print(game)
@@ -52,7 +52,7 @@ def cls():
 
 
 def main():
-    game = Game(board_dim=4)
+    game = Game(board_dim=6)
 
     player_play(game)
     # user_play(game)
