@@ -36,7 +36,7 @@ def player_play(game):
     player.learn(episodes=game.board_dim*2000, board_dim=game.board_dim)
     print("Stop learning")
 
-    on_move_played(game,None)
+    on_move_played(game, None)
     player.play_game(game=game, on_move_played=on_move_played)
 
 
