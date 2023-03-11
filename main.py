@@ -3,6 +3,7 @@ from player import Player
 from move import Move
 
 import time
+import os
 
 
 def user_play(game):
@@ -40,10 +41,14 @@ def player_play(game):
 
 
 def on_move_played(game, move):
+    cls()
     print(move)
     print(game)
-    print()
     time.sleep(2)
+
+
+def cls():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 
 def main():
